@@ -1,9 +1,18 @@
 import { GoogleGenAI } from "@google/genai";
 import { Candidate } from "./data";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    aiInstance = new GoogleGenAI({ apiKey: apiKey || "" });
+  }
+  return aiInstance;
+}
 
 export async function getCandidateInsights(candidates: Candidate[], userQuestion: string) {
+  const ai = getAI();
   const candidatesContext = candidates.map(c => 
     `Nome: ${c.name}, Formação: ${c.education}, Função: ${c.position}, Nota: ${c.score}, Status Sugerido: ${c.suggestedStatus}`
   ).join('\n');

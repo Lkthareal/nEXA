@@ -8,21 +8,18 @@
   <body>
     <div id="root"></div>
     <script>
-      // Fix for "TypeError: Cannot set property fetch of #<Window> which has only a getter"
-      // Some dependencies try to overwrite fetch, which fails if it's only a getter in this environment.
+      // Aggressive fix for "TypeError: Cannot set property fetch of #<Window> which has only a getter"
       (function() {
-        if (typeof window !== 'undefined' && window.fetch) {
-          var originalFetch = window.fetch;
-          try {
-            Object.defineProperty(window, 'fetch', {
-              value: originalFetch,
-              writable: true,
-              configurable: true,
-              enumerable: true
-            });
-          } catch (e) {
-            console.warn('Could not re-define fetch as writable in index.html:', e);
+        try {
+          if (typeof window !== 'undefined' && window.fetch) {
+            var f = window.fetch;
+            try {
+              delete window.fetch;
+            } catch (e) {}
+            window.fetch = f;
           }
+        } catch (e) {
+          console.warn('Fetch fix failed:', e);
         }
       })();
     </script>
